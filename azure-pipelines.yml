@@ -29,3 +29,23 @@ steps:
     PathtoPublish: '$(build.artifactStagingDirectory)\sqlApp.zip'
     artifactName: 'drop'
     publishLocation: 'Container'
+- task: AzureFileCopy@4
+  inputs:
+    SourcePath: '$(build.artifactStagingDirectory)\sqlApp.zip'
+    azureSubscription: 'Azure for Students (a14b6cfe-8553-4b23-b354-d5602f0f84aa)'
+    Destination: 'AzureVMs'
+    storage: 'true'
+    resourceGroup: 'APP-RG'
+    vmsAdminUserName: 'appvm'
+    vmsAdminPassword: 'Admin123admin'
+    TargetPath: 'C:\\inetpub\\wwwroot'
+
+# Deploy the application on the VM (Windows example with PowerShell)
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: 'Azure for Students (a14b6cfe-8553-4b23-b354-d5602f0f84aa)'  # Same as above
+    ScriptPath: './DeploysqlApp.ps1'           # Script to extract and configure the package on the VM
+    ScriptArguments: '-zipPath "C:\\inetpub\\wwwroot\\sqlApp.zip"'  # Adjust as needed
+    ResourceGroupName: 'APP-RG'      # Same as above
+    VMName: 'appvm'                        # Same as above
+    ErrorActionPreference: 'Stop'
